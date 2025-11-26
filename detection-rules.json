@@ -1,0 +1,966 @@
+{
+  "version": "1.1.1",
+  "lastUpdated": "2025-11-26T14:20:00Z",
+  "description": "Phishing detection logic for identifying phishing attempts targeting Microsoft 365 login pages",
+  "trusted_login_patterns": [
+    "^https:\\/\\/login\\.microsoftonline\\.(com|us)$",
+    "^https:\\/\\/login\\.microsoft\\.com$",
+    "^https:\\/\\/login\\.microsoft\\.net$",
+    "^https:\\/\\/login\\.windows\\.net$",
+    "^https:\\/\\/login\\.partner\\.microsoftonline\\.cn$",
+    "^https:\\/\\/login\\.live\\.com$",
+	"^https:\\/\\/account\\.booking\\.com$"
+  ],
+  "microsoft_domain_patterns": [
+    "^https:\\/\\/[^.]*\\.microsoft\\.com$",
+    "^https:\\/\\/[^.]*\\.microsoftonline\\.com$",
+    "^https:\\/\\/[^.]*\\.office\\.com$",
+    "^https:\\/\\/[^.]*\\.office365\\.com$",
+    "^https:\\/\\/[^.]*\\.sharepoint\\.com$",
+    "^https:\\/\\/[^.]*\\.onedrive\\.com$",
+    "^https:\\/\\/[^.]*\\.live\\.com$",
+    "^https:\\/\\/[^.]*\\.hotmail\\.com$",
+    "^https:\\/\\/[^.]*\\.outlook\\.com$",
+    "^https:\\/\\/.*\\.azure\\.(com|cn|net)$",
+    "^https:\\/\\/[^.]*\\.azurewebsites\\.net$",
+    "^https:\\/\\/[^.]*\\.msauth\\.net$",
+    "^https:\\/\\/[^.]*\\.msftauth\\.net$",
+    "^https:\\/\\/[^.]*\\.msftauthimages\\.net$",
+    "^https:\\/\\/[^.]*\\.msauthimages\\.net$",
+    "^https:\\/\\/[^.]*\\.msidentity\\.com$",
+    "^https:\\/\\/[^.]*\\.microsoftonline-p\\.com$",
+    "^https:\\/\\/[^.]*\\.microsoftazuread-sso\\.com$",
+    "^https:\\/\\/[^.]*\\.azureedge\\.net$",
+    "^https:\\/\\/[^.]*\\.bing\\.com$",
+    "^https:\\/\\/github\\.com$",
+    "^https:\\/\\/.*\\.cloud\\.microsoft$",
+    "^https:\\/\\/([^.]+\\.)*live\\.com(/.*)?$",
+	"^https:\\/\\/[^.]*\\.booking\\.com$"
+  ],
+  "exclusion_system": {
+    "description": "Centralized exclusion system to prevent false positives on legitimate sites",
+    "domain_patterns": [
+      "^https:\\/\\/[^/]*\\.cipp\\.app(/.*)?$",
+      "^https:\\/\\/(.*\\.)?cyberdrain\\.com(/.*)?$",
+      "^https:\\/\\/[^/]*\\.cow\\.tech(/.*)?$",
+      "^https:\\/\\/[^/]*\\.auth0\\.com(/.*)?$",
+      "^https:\\/\\/[^/]*\\.google\\.(com|co\\.uk|ca|de|fr|co|nl|com\\.au)(/.*)?$",
+      "^https:\\/\\/[^/]*\\.bing\\.com(/.*)?$",
+      "^https:\\/\\/[^/]*\\.yahoo\\.com(/.*)?$",
+      "^https:\\/\\/[^/]*\\.duckduckgo\\.com(/.*)?$",
+      "^https:\\/\\/[^/]*\\.amazon\\.(com|co\\.uk|ca|de|fr)(/.*)?$",
+      "^https:\\/\\/[^/]*\\.(facebook|twitter|x|linkedin|instagram)\\.com(/.*)?$",
+      "^https:\\/\\/[^/]*\\.(youtube|youtu)\\.be(/.*)?$",
+      "^https:\\/\\/[^/]*\\.apple\\.com(/.*)?$",
+      "^https:\\/\\/[^/]*\\.dynamics\\.com(/.*)?$",
+      "^https:\\/\\/(?:[^/]*\\.)?zoom\\.us(/.*)?$",
+      "^https:\\/\\/github\\.com(/.*)?$",
+      "^https:\\/\\/[^/]*\\.github\\.com(/.*)?$",
+      "^https:\\/\\/[^/]*\\.github\\.io(/.*)?$",
+	  "^https:\\/\\/imghostazure\\.blob\\.core\\.windows\\.net(/.*)?$"
+    ],
+    "context_indicators": {
+      "description": "Additional context that indicates legitimate discussion vs phishing",
+      "legitimate_contexts": [],
+      "legitimate_sso_patterns": [],
+      "suspicious_contexts": [
+        "verify now",
+        "click here",
+        "urgent action",
+        "suspended account",
+        "security alert",
+        "immediate attention",
+        "limited time"
+      ]
+    }
+  },
+  "legitimate_discussion_domains": [],
+  "m365_detection_requirements": {
+    "description": "Required elements to identify a Microsoft 365 login page with primary and secondary categorization",
+    "primary_elements": [
+      {
+        "id": "idPartnerPL",
+        "type": "source_content",
+        "pattern": "idPartnerPL",
+        "description": "Microsoft partner login field must be in source",
+        "weight": 3,
+        "category": "primary"
+      },
+      {
+        "id": "loginfmt",
+        "type": "source_content",
+        "pattern": "loginfmt",
+        "description": "Login format field must be in source",
+        "weight": 3,
+        "category": "primary"
+      },
+      {
+        "id": "aadcdn_msauth",
+        "type": "source_content",
+        "pattern": "aadcdn\\.msauth\\.net",
+        "description": "Microsoft auth CDN must be present in source",
+        "weight": 3,
+        "category": "primary"
+      },
+      {
+        "id": "urlMsaSignUp",
+        "type": "source_content",
+        "pattern": "urlMsaSignUp",
+        "description": "Microsoft signup URL reference must be in source",
+        "weight": 2,
+        "category": "primary"
+      },
+      {
+        "id": "i0116_element",
+        "type": "source_content",
+        "pattern": "#i0116",
+        "description": "Microsoft login input element must be in source",
+        "weight": 2,
+        "category": "primary"
+      },
+      {
+        "id": "aadcdn_background_image",
+        "type": "source_content",
+        "pattern": "aadcdn\\.msauth\\.net/shared/1\\.0/content/images/backgrounds/",
+        "description": "Microsoft login page background image from CDN",
+        "weight": 3,
+        "category": "primary"
+      }
+    ],
+    "secondary_elements": [
+      {
+        "id": "ms_form_dimensions",
+        "type": "css_pattern",
+        "patterns": [
+          "max-width:\\s*440px",
+          "width:\\s*calc\\(100%\\s*-\\s*40px\\)",
+          "width:\\s*27\\.5rem",
+          "height:\\s*21\\.125rem"
+        ],
+        "description": "Microsoft login form width patterns (supporting evidence only)",
+        "weight": 0.5,
+        "category": "secondary"
+      },
+      {
+        "id": "ms_button_colors",
+        "type": "css_pattern",
+        "patterns": [
+          "background-color:\\s*#0067b8",
+          "border:\\s*1px\\s+solid\\s+#0067b8"
+        ],
+        "description": "Microsoft specific button styling (supporting evidence only)",
+        "weight": 1,
+        "category": "secondary"
+      },
+      {
+        "id": "segoe_ui_font",
+        "type": "source_content",
+        "pattern": "Segoe\\s+UI(?:\\s+(?:Webfont|Symbol|Historic|Emoji))?",
+        "description": "Microsoft's Segoe UI font family variants (supporting evidence only)",
+        "weight": 0.5,
+        "category": "secondary"
+      },
+      {
+        "id": "ms_container_layout",
+        "type": "css_pattern",
+        "patterns": [
+          "display:\\s*grid.*place-items:\\s*center",
+          "height:\\s*100vh.*width:\\s*100vw"
+        ],
+        "description": "Microsoft login container layout (supporting evidence only)",
+        "weight": 0.5,
+        "category": "secondary"
+      },
+      {
+        "id": "ms_external_css",
+        "type": "source_content",
+        "pattern": "(?:href=[\"'].*(?:aadcdn\\.msauth|aadcdn\\.msftauth|login\\.microsoftonline).*\\.css[\"']|src=[\"'].*(?:aadcdn\\.msauth|login\\.microsoft).*\\.css[\"'])",
+        "description": "Microsoft login-specific CSS files (strong evidence)",
+        "weight": 3,
+        "category": "secondary"
+      },
+      {
+        "id": "password_input_field",
+        "type": "source_content",
+        "pattern": "<input[^>]*(?:type=[\"']password[\"']|name=[\"']password[\"']|id=[\"'][^\"']*password[^\"']*[\"'])[^>]*>",
+        "description": "Password input field present on page (supporting evidence only)",
+        "weight": 1,
+        "category": "secondary"
+      },
+      {
+        "id": "login_form_element",
+        "type": "source_content",
+        "pattern": "<input[^>]*type=[\"'](?:email|text|tel)[\"'][^>]*(?:placeholder=[\"'][^\"']+[\"'][^>]*|[^>]*)>",
+        "description": "Login form input field (email/text/tel type) with placeholder attribute",
+        "weight": 1,
+        "category": "secondary"
+      }
+    ],
+    "detection_thresholds": {
+      "minimum_primary_elements": 1,
+      "minimum_total_weight": 4,
+      "minimum_elements_overall": 3,
+      "minimum_secondary_only_weight": 9,
+      "minimum_secondary_only_elements": 7
+    },
+    "legacy_minimum_required": 4,
+    "legacy_all_must_be_present": false
+  },
+  "blocking_rules": [
+    {
+      "id": "form_post_not_microsoft",
+      "type": "form_action_validation",
+      "description": "Block the page if the credentials are not sent to Microsoft",
+      "condition": {
+        "form_selector": "form",
+        "action_must_not_contain": "login.microsoftonline.com",
+        "has_password_field": true
+      },
+      "action": "block",
+      "severity": "critical"
+    },
+    {
+      "id": "customcss_wrong_origin",
+      "type": "resource_validation",
+      "description": "Block if customcss is loaded from non-Microsoft CDN",
+      "condition": {
+        "resource_pattern": "customcss",
+        "required_origin": "https:\\/\\/aadcdn.msftauthimages.net/",
+        "block_if_different_origin": true
+      },
+      "action": "block",
+      "severity": "critical"
+    },
+    {
+      "id": "css_spoofing_detection",
+      "type": "css_spoofing_validation",
+      "description": "Block if page mimics Microsoft CSS styling but posts to non-Microsoft domain",
+      "condition": {
+        "css_indicators": [
+          "logincdn\\.msauth\\.net",
+          "background-color:\\s*#0067b8",
+          "max-width:\\s*440px",
+          "width:\\s*calc\\(100%\\s*-\\s*40px\\)",
+          "width:\\s*27\\.5rem.*height:\\s*21\\.125rem",
+          "display:\\s*grid.*place-items:\\s*center",
+          "Segoe\\s+UI(?:\\s+(?:Webfont|Symbol|Historic|Emoji))?"
+        ],
+        "minimum_css_matches": 3,
+        "form_action_must_not_contain": "login.microsoftonline.com",
+        "has_credential_fields": true
+      },
+      "action": "block",
+      "severity": "critical"
+    }
+  ],
+  "allow_rules": [
+    {
+      "id": "microsoft_domain_allow",
+      "type": "url_validation",
+      "description": "Allow if URL is login.microsoftonline.com",
+      "condition": {
+        "url_equals": "login.microsoftonline.com"
+      },
+      "action": "allow",
+      "priority": "highest"
+    }
+  ],
+  "aad_detection_elements": [
+    {
+      "id": "loginfmt_field",
+      "selectors": [
+        "input[name='loginfmt']",
+        "#i0116"
+      ],
+      "description": "Azure AD username/email input field",
+      "weight": 30
+    },
+    {
+      "id": "next_button",
+      "selectors": [
+        "#idSIButton9"
+      ],
+      "description": "Azure AD Next/Sign in button",
+      "weight": 25
+    },
+    {
+      "id": "password_field",
+      "selectors": [
+        "input[type='password']"
+      ],
+      "description": "Password input field",
+      "weight": 20
+    },
+    {
+      "id": "microsoft_branding",
+      "text_patterns": [
+        "Microsoft\\s*365",
+        "Office\\s*365",
+        "Entra\\s*ID",
+        "Azure\\s*AD",
+        "Microsoft"
+      ],
+      "description": "Microsoft branding text",
+      "weight": 15
+    }
+  ],
+  "required_elements": [
+    {
+      "id": "idPartnerPL",
+      "selectors": [
+        "input[name='idPartnerPL']",
+        "[name*='idPartnerPL']",
+        "[id*='idPartnerPL']"
+      ],
+      "description": "Microsoft partner login field",
+      "weight": 20
+    },
+    {
+      "id": "urlMsaSignUp",
+      "text_patterns": [
+        "urlMsaSignUp"
+      ],
+      "description": "Microsoft signup URL reference",
+      "weight": 15
+    },
+    {
+      "id": "flowToken",
+      "text_patterns": [
+        "flowToken"
+      ],
+      "description": "Microsoft authentication flow token",
+      "weight": 15
+    },
+    {
+      "id": "aadcdn_msauth",
+      "text_patterns": [
+        "https:\\/\\/aadcdn\\.msauth\\.net/"
+      ],
+      "description": "Microsoft authentication CDN reference",
+      "weight": 15
+    }
+  ],
+  "rules": [
+    {
+      "id": "check_legitimate_domain",
+      "type": "url",
+      "weight": 25,
+      "condition": {
+        "domains": [
+          "login.microsoftonline.com"
+        ]
+      },
+      "description": "Verify legitimate Microsoft domain (must be login.microsoftonline.com)"
+    },
+    {
+      "id": "check_form_post_url",
+      "type": "form_action",
+      "weight": 30,
+      "condition": {
+        "contains": "login.microsoftonline.com",
+        "form_selector": "form[action]"
+      },
+      "description": "Form POST URL must be login.microsoftonline.com for legitimate pages"
+    },
+    {
+      "id": "detect_idpartnerpl_field",
+      "type": "dom",
+      "weight": 20,
+      "condition": {
+        "selectors": [
+          "input[name='idPartnerPL']",
+          "[name*='idPartnerPL']",
+          "[id*='idPartnerPL']"
+        ]
+      },
+      "description": "Detect presence of idPartnerPL field"
+    },
+    {
+      "id": "detect_url_msa_signup",
+      "type": "content",
+      "weight": 15,
+      "condition": {
+        "contains": "urlMsaSignUp",
+        "search_context": "page_source"
+      },
+      "description": "Detect urlMsaSignUp presence in page code"
+    },
+    {
+      "id": "detect_aadcdn_msauth",
+      "type": "content",
+      "weight": 15,
+      "condition": {
+        "contains": "https:\\/\\/aadcdn.msauth.net/",
+        "search_context": "page_source"
+      },
+      "description": "Detect aadcdn.msauth.net presence in source"
+    },
+    {
+      "id": "check_loginfmt_field",
+      "type": "dom",
+      "weight": 20,
+      "condition": {
+        "selectors": [
+          "input[name='loginfmt']",
+          "#i0116"
+        ]
+      },
+      "description": "Check for loginfmt input field availability"
+    },
+    {
+      "id": "detect_flow_token",
+      "type": "content",
+      "weight": 15,
+      "condition": {
+        "contains": "flowToken",
+        "search_context": "page_source"
+      },
+      "description": "Detect flowToken presence in page"
+    },
+    {
+      "id": "verify_customcss_source",
+      "type": "network",
+      "weight": 25,
+      "condition": {
+        "network_pattern": "*customcss*",
+        "required_domain": "https:\\/\\/aadcdn.msftauthimages.net/"
+      },
+      "description": "Custom CSS files must originate from aadcdn.msftauthimages.net"
+    },
+    {
+      "id": "check_valid_referrer",
+      "type": "referrer_validation",
+      "weight": 25,
+      "condition": {
+        "header_name": "referer",
+        "validation_method": "pattern_match",
+        "pattern_source": "microsoft_domain_patterns"
+      },
+      "description": "Validate referrer against Microsoft domain patterns for legitimate authentication flows"
+    }
+  ],
+  "thresholds": {
+    "legitimate": 85,
+    "suspicious": 55,
+    "phishing": 25
+  },
+  "phishing_indicators": [
+    {
+      "id": "phi_001",
+      "pattern": "(?:secure-?(?:microsoft|office|365|outlook))",
+      "flags": "i",
+      "severity": "high",
+      "description": "Suspicious domain mimicking Microsoft services",
+      "action": "block",
+      "category": "domain_spoofing",
+      "confidence": 0.9
+    },
+    {
+      "id": "phi_004",
+      "pattern": "(?:urgent.*(?:action|update|verify)|immediate.*(?:action|attention)|act.*(?:now|immediately)).*(?:microsoft|office|365)",
+      "flags": "i",
+      "severity": "medium",
+      "description": "Urgency tactics targeting Microsoft users",
+      "action": "warn",
+      "category": "social_engineering",
+      "confidence": 0.65
+    },
+    {
+      "id": "phi_005",
+      "pattern": "data:text/html.*(?:microsoft|office|365|outlook).*(?:login|password|signin)",
+      "flags": "i",
+      "severity": "critical",
+      "description": "Data URI containing Microsoft login form",
+      "action": "block",
+      "category": "credential_harvesting",
+      "confidence": 0.95
+    },
+    {
+      "id": "phi_007",
+      "pattern": "\\*customcss.*(?!aadcdn\\.msftauthimages\\.net)",
+      "flags": "i",
+      "severity": "high",
+      "description": "Custom CSS loaded from non-authorized domain",
+      "action": "block",
+      "category": "resource_hijacking",
+      "confidence": 0.85
+    },
+    {
+      "id": "phi_012_suspicious_resources",
+      "pattern": "(?=.*customcss)(?!.*aadcdn\\.msftauthimages\\.net)",
+      "flags": "i",
+      "severity": "high",
+      "description": "Custom CSS loaded from unauthorized domain",
+      "action": "block",
+      "category": "resource_hijacking",
+      "confidence": 0.9
+    },
+    {
+      "id": "phi_006",
+      "pattern": "(?:microsoft|office|365).{0,2000}(?:login|password|signin).{0,500}form.{0,200}action(?!.*login\\.microsoftonline\\.com)(?!.*\\.auth/login/)(?!.*azure\\s+static\\s+web\\s+apps)(?!.*easy\\s+auth)",
+      "flags": "i",
+      "severity": "high",
+      "description": "Microsoft-branded login form POST URL not pointing to login.microsoftonline.com",
+      "action": "warn",
+      "category": "credential_harvesting",
+      "confidence": 0.8
+    },
+    {
+      "id": "phi_010_aad_fingerprint",
+      "pattern": "(?:loginfmt|i0116).{0,1000}(?:idSIButton9|type=[\"']submit[\"'])(?!.*login\\.microsoftonline\\.com)",
+      "flags": "i",
+      "severity": "critical",
+      "description": "AAD-like login interface detected on non-Microsoft domain",
+      "action": "block",
+      "category": "interface_spoofing",
+      "confidence": 0.98
+    },
+    {
+      "id": "phi_011_missing_elements",
+      "pattern": "(?:microsoft|office|365).{0,2000}(?:type=[\"']password[\"']|method=[\"']post[\"'])(?!.*(?:idPartnerPL|urlMsaSignUp|flowToken))",
+      "flags": "i",
+      "severity": "high",
+      "description": "Microsoft branding without required authentication elements",
+      "action": "warn",
+      "category": "incomplete_spoofing",
+      "confidence": 0.85
+    },
+    {
+      "id": "phi_013_form_action_mismatch",
+      "pattern": "(?:microsoft|office|365).{0,1500}(?:password|passwd).{0,500}action=(?!.*login\\.microsoftonline\\.com)",
+      "flags": "i",
+      "severity": "critical",
+      "description": "Microsoft-branded password form with non-Microsoft action URL",
+      "action": "block",
+      "category": "credential_harvesting",
+      "confidence": 0.95
+    },
+    {
+      "id": "phi_014_devtools_blocking",
+      "pattern": "(?:debugger|devtools?|F12.*prevent|contextmenu.*prevent|selectstart.*prevent|setInterval.*debugger|while.*true.*debugger)",
+      "flags": "i",
+      "severity": "high",
+      "description": "Page attempts to block or detect developer tools usage",
+      "action": "block",
+      "category": "anti_analysis",
+      "confidence": 0.9,
+      "additional_checks": [
+        "document.addEventListener('keydown'",
+        "event.keyCode === 123",
+        "event.which === 123",
+        "debugger;",
+        "setInterval(function(){debugger;}",
+        "while(true){debugger;}",
+        "console.clear()",
+        "addEventListener('contextmenu'",
+        "oncontextmenu=\"return false\"",
+        "onselectstart=\"return false\"",
+        "ondragstart=\"return false\"",
+        "function(_0x",
+        "_0x506b",
+        "keyCode==0x7b",
+        "ctrlKey&&.*shiftKey&&.*keyCode==0x",
+        "preventDefault().*console.*error",
+        "attempt mitigated",
+        "Inspect element attempt mitigated",
+        "Console attempt mitigated",
+        "Right-click attempt mitigated",
+        "antiDebug",
+        "enableSecurityFeatures",
+        "setInterval.*redirect"
+      ]
+    },
+    {
+      "id": "phi_015_code_obfuscation",
+      "pattern": "(?:eval\\s*\\(\\s*(?:atob|unescape|decodeURIComponent)|(?:new\\s+)?Function\\s*\\([^)]{0,100}atob|setInterval\\s*\\([^)]{0,100}(?:atob|eval)|setTimeout\\s*\\([^)]{0,100}(?:atob|eval)|document\\.write\\s*\\([^)]{0,100}(?:atob|unescape))",
+      "flags": "i",
+      "severity": "high",
+      "description": "Page contains suspicious JavaScript obfuscation patterns commonly used in malware",
+      "action": "warn",
+      "category": "code_obfuscation",
+      "confidence": 0.85,
+      "context_required": [
+        "(?:microsoft|office|365|login|password|credential)"
+      ],
+      "additional_checks": [
+        "eval(atob(",
+        "eval(unescape(",
+        "eval(decodeURIComponent(",
+        "Function(atob(",
+        "new Function(atob(",
+        "setInterval(eval(",
+        "setTimeout(eval(",
+        "document.write(atob(",
+        "document.write(unescape("
+      ]
+    },
+    {
+      "id": "phi_008",
+      "pattern": "content-security-policy-report-only.*(?!.*msauth\\.net|.*msftauth\\.net|.*msftauthimages\\.net|.*msauthimages\\.net|.*msidentity\\.com|.*microsoftonline-p\\.com|.*microsoftazuread-sso\\.com|.*azureedge\\.net|.*outlook\\.com|.*office\\.com|.*office365\\.com|.*microsoft\\.com|.*bing\\.com)",
+      "flags": "i",
+      "severity": "critical",
+      "description": "Missing required CSP domains in BeginAuth request",
+      "action": "block",
+      "category": "header_manipulation",
+      "confidence": 0.9
+    },
+    {
+      "id": "phi_019_malicious_obfuscation",
+      "pattern": "(?:(?:var|let|const)\\s+\\w+\\s*=\\s*(?:atob|unescape)\\([^)]+\\);\\s*eval\\(\\w+\\)|\\w+\\.split\\(['\"]['\"]\\)\\.reverse\\(\\)\\.join\\(['\"]['\"]\\)|String\\.fromCharCode\\((?:\\d+,\\s*){10,}\\d+\\))",
+      "flags": "i",
+      "severity": "critical",
+      "description": "Page contains advanced malicious obfuscation techniques",
+      "action": "block",
+      "category": "malicious_obfuscation",
+      "confidence": 0.95
+    },
+    {
+      "id": "phi_001_enhanced",
+      "pattern": "(?!.*(?:sign\\s+in\\s+with\\s+microsoft|continue\\s+with\\s+microsoft|login\\s+with\\s+microsoft|authenticate\\s+with\\s+microsoft|sso\\s+microsoft|oauth\\s+microsoft|\\.auth/login/|azure\\s+static\\s+web\\s+apps|easy\\s+auth))(?:secure-?(?:microsoft|office|365|outlook)|microsoft-?(?:secure|login|auth)|office-?(?:secure|login|auth)|365-?(?:secure|login|auth))",
+      "flags": "i",
+      "severity": "critical",
+      "description": "Enhanced detection of domains mimicking Microsoft services with security/login keywords (excludes legitimate SSO)",
+      "action": "block",
+      "category": "domain_spoofing",
+      "confidence": 0.95
+    },
+    {
+      "id": "phi_002",
+      "pattern": "(?!.*(?:sign\\s+in\\s+with\\s+microsoft|continue\\s+with\\s+microsoft|login\\s+with\\s+microsoft|sso|oauth|third.?party\\s+auth|\\.auth/login/|azure\\s+static\\s+web\\s+apps|easy\\s+auth))(?:microsoft|office|365).{0,500}(?:security|verification|account).{0,300}(?:team|department|support)",
+      "flags": "i",
+      "severity": "high",
+      "description": "Impersonation of Microsoft security team (excludes legitimate SSO and third-party auth)",
+      "action": "block",
+      "category": "brand_impersonation",
+      "confidence": 0.85
+    },
+    {
+      "id": "phi_003",
+      "pattern": "(?!.*(?:sign\\s+in\\s+with\\s+microsoft|continue\\s+with\\s+microsoft|login\\s+with\\s+microsoft|authenticate\\s+with\\s+microsoft|sso|oauth|third.?party\\s+auth|\\.auth/login/|azure\\s+static\\s+web\\s+apps|easy\\s+auth))(?:verify.{0,200}account|suspended.{0,200}365|update.{0,200}office|secure.{0,200}microsoft|account.{0,200}security|security.{0,200}verification|365.{0,200}suspended|office.{0,200}update|microsoft.{0,200}secure|login.{0,200}microsoft|microsoft.{0,200}login|microsoft.{0,200}authentication|authentication.{0,200}microsoft|office.{0,200}365.{0,200}login|365.{0,200}office.{0,200}login)",
+      "flags": "i",
+      "severity": "high",
+      "description": "Common Microsoft 365 phishing keywords and variations",
+      "action": "block",
+      "category": "social_engineering",
+      "confidence": 0.85
+    },
+    {
+      "id": "phi_020_grammar_typos",
+      "pattern": "(?:verify\\s+your\\s+informations|click\\s+hear|recieve|loose\\s+access|acount|secuirty|authentification|guarentee|occured|seperate)",
+      "flags": "i",
+      "severity": "medium",
+      "description": "Common grammar/spelling errors in phishing content",
+      "action": "warn",
+      "category": "content_quality",
+      "confidence": 0.7
+    },
+    {
+      "id": "phi_021_suspicious_url_structure",
+      "pattern": "(?<=://[^/]+)(?:/[a-zA-Z0-9]{20,}(?:/[a-zA-Z0-9]{8,})*(?=/|\\?|#|$)|/[a-zA-Z0-9_-]{40,}(?=/|\\?|#|$))",
+      "flags": "i",
+      "severity": "medium",
+      "description": "Suspicious URL structure with long random strings in path segments (before query parameters)",
+      "action": "warn",
+      "category": "url_structure",
+      "confidence": 0.5
+    },
+    {
+      "id": "phi_022_obfuscated_script_names",
+      "pattern": "(?:src=[\"'][^\"']*[a-zA-Z0-9]{12,20}\\.js[\"']|[a-zA-Z0-9]{12,20}\\.js)",
+      "flags": "i",
+      "severity": "medium",
+      "description": "Scripts with obfuscated/randomized filenames to avoid detection",
+      "action": "warn",
+      "category": "script_obfuscation",
+      "confidence": 0.8,
+      "context_required": [
+        "(?:microsoft|office|365|login|password|email|verify)"
+      ]
+    },
+    {
+      "id": "phi_017_microsoft_brand_abuse",
+      "pattern": "(?!.*(?:sign\\s+in\\s+with\\s+microsoft|continue\\s+with\\s+microsoft|login\\s+with\\s+microsoft|authenticate\\s+with\\s+microsoft|sso|oauth|third.?party\\s+auth|\\.auth/login/|azure\\s+static\\s+web\\s+apps|easy\\s+auth|discussion|forum|community|tutorial|guide|documentation|support|help|wiki|blog|article|how\\s+to|step\\s+by\\s+step|configure|setup|administration|management))(?:(?:microsoft|office|365).{0,1000}(?:login|sign.{0,50}in|authentication)|(?:login|sign.{0,50}in|authentication).{0,1000}(?:microsoft|office|365))",
+      "flags": "i",
+      "severity": "high",
+      "description": "Microsoft branding combined with login/authentication terms on non-Microsoft domain",
+      "action": "block",
+      "category": "brand_abuse",
+      "confidence": 0.95
+    }
+  ],
+  "legitimate_patterns": [
+    {
+      "id": "leg_001",
+      "pattern": "login\\.microsoftonline\\.com",
+      "description": "Official Microsoft Online login domain",
+      "confidence": 1.0
+    },
+    {
+      "id": "leg_002",
+      "element_selectors": [
+        "input[name='loginfmt']",
+        "input[name='passwd']",
+        "input[name='idPartnerPL']"
+      ],
+      "description": "Legitimate Microsoft login form elements including idPartnerPL",
+      "confidence": 0.8
+    },
+    {
+      "id": "leg_003",
+      "content_patterns": [
+        "urlMsaSignUp",
+        "flowToken",
+        "https:\\/\\/aadcdn.msauth.net/"
+      ],
+      "description": "Legitimate Microsoft authentication code patterns",
+      "confidence": 0.85
+    },
+    {
+      "id": "leg_004",
+      "resource_patterns": [
+        "https:\\/\\/aadcdn.msftauthimages.net/.*customcss.*"
+      ],
+      "description": "Legitimate source for custom CSS resources",
+      "confidence": 0.9
+    },
+    {
+      "id": "leg_005",
+      "csp_domains": [
+        "https:\\/\\/*.msauth.net/",
+        "https:\\/\\/*.msftauth.net/",
+        "https:\\/\\/*.msftauthimages.net/",
+        "https:\\/\\/*.msauthimages.net/",
+        "https:\\/\\/*.msidentity.com/",
+        "https:\\/\\/*.microsoftonline-p.com/",
+        "https:\\/\\/*.microsoftazuread-sso.com/",
+        "https:\\/\\/*.azureedge.net/",
+        "https:\\/\\/*.outlook.com/",
+        "https:\\/\\/*.office.com/",
+        "https:\\/\\/*.office365.com/",
+        "https:\\/\\/*.microsoft.com/",
+        "https:\\/\\/*.bing.com/"
+      ],
+      "description": "Required domains in content-security-policy-report-only header",
+      "confidence": 1.0
+    },
+    {
+      "id": "leg_006",
+      "referrer_patterns": [
+        "https:\\/\\/login\\.microsoftonline\\.com",
+        "https:\\/\\/login\\.microsoft\\.net",
+        "https:\\/\\/login\\.microsoft\\.com",
+        "https:\\/\\/autologon\\.microsoftazuread-sso\\.com",
+        "https:\\/\\/tasks\\.office\\.com",
+        "https:\\/\\/login\\.windows\\.net",
+        "https:\\/\\/planner\\.cloud\\.microsoft"
+      ],
+      "description": "Valid Microsoft referrers from custom allow list",
+      "confidence": 0.95
+    }
+  ],
+  "suspicious_behaviors": [
+    {
+      "id": "sus_001",
+      "behavior": "password_field_without_microsoft_domain",
+      "description": "Password field on non-Microsoft domain with Microsoft branding",
+      "severity": "high",
+      "action": "warn"
+    },
+    {
+      "id": "sus_002",
+      "behavior": "microsoft_keywords_on_suspicious_domain",
+      "description": "Microsoft-related keywords on suspicious domain",
+      "severity": "medium",
+      "action": "monitor"
+    },
+    {
+      "id": "sus_003",
+      "behavior": "form_submit_to_external_domain",
+      "description": "Login form submitting to non-Microsoft domain",
+      "severity": "critical",
+      "action": "block"
+    },
+    {
+      "id": "sus_004",
+      "behavior": "missing_idpartnerpl_field",
+      "description": "Microsoft login page missing idPartnerPL field",
+      "severity": "medium",
+      "action": "warn"
+    },
+    {
+      "id": "sus_005",
+      "behavior": "missing_urlmsasignup",
+      "description": "Missing urlMsaSignUp in page source code",
+      "severity": "medium",
+      "action": "warn"
+    },
+    {
+      "id": "sus_006",
+      "behavior": "missing_aadcdn_msauth",
+      "description": "Missing https://aadcdn.msauth.net/ reference in source",
+      "severity": "medium",
+      "action": "warn"
+    },
+    {
+      "id": "sus_007",
+      "behavior": "missing_loginfmt_field",
+      "description": "Missing loginfmt input field",
+      "severity": "high",
+      "action": "warn"
+    },
+    {
+      "id": "sus_008",
+      "behavior": "missing_flow_token",
+      "description": "Missing flowToken in page source",
+      "severity": "medium",
+      "action": "warn"
+    },
+    {
+      "id": "sus_009",
+      "behavior": "customcss_wrong_source",
+      "description": "Custom CSS loaded from unauthorized domain (not aadcdn.msftauthimages.net)",
+      "severity": "high",
+      "action": "block"
+    },
+    {
+      "id": "sus_010",
+      "behavior": "invalid_csp_header",
+      "description": "BeginAuth request missing proper content-security-policy-report-only header",
+      "severity": "critical",
+      "action": "block"
+    },
+    {
+      "id": "sus_011",
+      "behavior": "invalid_referrer",
+      "description": "Request contains referrer not in custom allow list",
+      "severity": "high",
+      "action": "warn"
+    }
+  ],
+  "detection_settings": {
+    "enable_real_time_scanning": true,
+    "enable_form_monitoring": true,
+    "enable_url_verification": true,
+    "enable_content_analysis": true,
+    "enable_verification_badge": false,
+    "block_threshold": 0.8,
+    "warn_threshold": 0.6,
+    "monitor_threshold": 0.4,
+    "aad_detection_threshold": 2,
+    "required_elements_threshold": 3,
+    "monitoring_timeout": 20000
+  },
+  "detection_logic": {
+    "aad_fingerprint_rules": [
+      {
+        "id": "aad_basic",
+        "condition": "hasLoginFmt AND hasNextBtn",
+        "description": "Basic AAD interface detection",
+        "weight": 50
+      },
+      {
+        "id": "aad_branded",
+        "condition": "brandingHit AND (hasLoginFmt OR hasPw)",
+        "description": "Microsoft branding with login elements",
+        "weight": 45
+      }
+    ],
+    "trigger_rules": [
+      {
+        "id": "untrusted_aad_like",
+        "condition": "aadLike AND NOT isTrustedOrigin",
+        "action": "flag_phishy",
+        "severity": "critical",
+        "description": "AAD-like interface on untrusted domain"
+      },
+      {
+        "id": "bad_form_action",
+        "condition": "requireAction AND actionCheck.fail",
+        "action": "flag_phishy",
+        "severity": "high",
+        "description": "Form action not pointing to Microsoft"
+      },
+      {
+        "id": "bad_resources",
+        "condition": "strictAudit AND resourceAudit.nonMicrosoftCount > 0",
+        "action": "flag_phishy",
+        "severity": "medium",
+        "description": "Non-Microsoft resources detected"
+      },
+      {
+        "id": "phi_020_base64_document_write",
+        "pattern": "document\\.write\\s*\\(\\s*atob\\s*\\(\\s*[\"'][A-Za-z0-9+/=]{40,}[\"']\\s*\\)\\s*\\)",
+        "flags": "gi",
+        "severity": "critical",
+        "description": "Base64 obfuscated document.write detected - common iframe injection technique",
+        "action": "block",
+        "category": "iframe_evasion",
+        "confidence": 0.95
+      },
+      {
+        "id": "phi_021_large_base64_strings",
+        "pattern": "[\"'][A-Za-z0-9+/=]{100,}[\"']",
+        "flags": "g",
+        "severity": "medium",
+        "description": "Large base64 strings detected in page content",
+        "action": "warn",
+        "category": "code_obfuscation",
+        "confidence": 0.7,
+        "context_required": [
+          "(?:atob|eval|innerHTML|document\\.write)"
+        ]
+      },
+      {
+        "id": "phi_022_cross_origin_fullscreen_iframe",
+        "pattern": "<iframe[^>]*(?:width\\s*[:=]\\s*[\"']?100%[\"']?|height\\s*[:=]\\s*[\"']?100(?:%|vh)[\"']?)[^>]*src\\s*=\\s*[\"']https?://(?!(?:[^./]*\\.)?(?:microsoft|microsoftonline|office|office365|sharepoint|onedrive|live|hotmail|outlook|azure|msauth|msftauth|msftauthimages|msauthimages|msidentity|microsoftonline-p|microsoftazuread-sso|azureedge|bing)\\.)[^\"']+[\"'][^>]*>",
+        "flags": "gi",
+        "severity": "critical",
+        "description": "Cross-origin full-viewport iframe detected",
+        "action": "block",
+        "category": "iframe_evasion",
+        "confidence": 0.9
+      },
+      {
+        "id": "phi_024_unsandboxed_cross_origin_iframe",
+        "pattern": "<iframe(?![^>]*sandbox)[^>]*src\\s*=\\s*[\"']https?://(?!(?:[^./]*\\.)?(?:microsoft|microsoftonline|office|office365|sharepoint|onedrive|live|hotmail|outlook|azure|msauth|msftauth|msftauthimages|msauthimages|msidentity|microsoftonline-p|microsoftazuread-sso|azureedge|bing)\\.)[^\"']+[\"'][^>]*>",
+        "flags": "gi",
+        "severity": "high",
+        "description": "Cross-origin iframe without sandbox attribute",
+        "action": "warn",
+        "category": "iframe_security",
+        "confidence": 0.75
+      }
+    ],
+    "form_validation_rules": [
+      {
+        "id": "require_microsoft_action",
+        "condition": "hasPasswordField AND NOT isTrustedFormAction",
+        "action": "block_form",
+        "description": "Password form must submit to Microsoft domain"
+      }
+    ],
+    "resource_validation_rules": [
+      {
+        "id": "validate_css_origin",
+        "pattern": "customcss",
+        "required_origins": [
+          "aadcdn.msftauthimages.net"
+        ],
+        "action": "block",
+        "description": "Custom CSS must come from Microsoft CDN"
+      }
+    ]
+  },
+  "rogue_apps_detection": {
+    "description": "Dynamic detection of known rogue OAuth applications",
+    "enabled": true,
+    "source_url": "https://raw.githubusercontent.com/huntresslabs/rogueapps/refs/heads/main/public/rogueapps.json",
+    "cache_duration": 86400000,
+    "update_interval": 43200000,
+    "detection_action": "warn",
+    "severity": "high",
+    "log_matches": true,
+    "auto_update": true,
+    "fallback_on_error": true
+  }
+}
