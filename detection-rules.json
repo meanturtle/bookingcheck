@@ -1,6 +1,6 @@
 {
-  "version": "1.1.6",
-  "lastUpdated": "2025-09-08T14:20:00Z",
+  "version": "1.1.1",
+  "lastUpdated": "2025-11-26T14:20:00Z",
   "description": "Phishing detection logic for identifying phishing attempts targeting Microsoft 365 login pages",
   "trusted_login_patterns": [
     "^https:\\/\\/login\\.microsoftonline\\.(com|us)$",
@@ -8,7 +8,8 @@
     "^https:\\/\\/login\\.microsoft\\.net$",
     "^https:\\/\\/login\\.windows\\.net$",
     "^https:\\/\\/login\\.partner\\.microsoftonline\\.cn$",
-    "^https:\\/\\/login\\.live\\.com$"
+    "^https:\\/\\/login\\.live\\.com$",
+	"^https:\\/\\/account\\.booking\\.com$"
   ],
   "microsoft_domain_patterns": [
     "^https:\\/\\/[^.]*\\.microsoft\\.com$",
@@ -33,7 +34,8 @@
     "^https:\\/\\/[^.]*\\.bing\\.com$",
     "^https:\\/\\/github\\.com$",
     "^https:\\/\\/.*\\.cloud\\.microsoft$",
-    "^https:\\/\\/([^.]+\\.)*live\\.com(/.*)?$"
+    "^https:\\/\\/([^.]+\\.)*live\\.com(/.*)?$",
+	"^https:\\/\\/[^.]*\\.booking\\.com$"
   ],
   "exclusion_system": {
     "description": "Centralized exclusion system to prevent false positives on legitimate sites",
@@ -54,7 +56,8 @@
       "^https:\\/\\/(?:[^/]*\\.)?zoom\\.us(/.*)?$",
       "^https:\\/\\/github\\.com(/.*)?$",
       "^https:\\/\\/[^/]*\\.github\\.com(/.*)?$",
-      "^https:\\/\\/[^/]*\\.github\\.io(/.*)?$"
+      "^https:\\/\\/[^/]*\\.github\\.io(/.*)?$",
+	  "^https:\\/\\/imghostazure\\.blob\\.core\\.windows\\.net(/.*)?$"
     ],
     "context_indicators": {
       "description": "Additional context that indicates legitimate discussion vs phishing",
