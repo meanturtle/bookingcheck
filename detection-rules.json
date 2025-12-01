@@ -1,5 +1,5 @@
 {
-  "version": "1.0.6",
+  "version": "1.1.6",
   "lastUpdated": "2025-09-08T14:20:00Z",
   "description": "Phishing detection logic for identifying phishing attempts targeting Microsoft 365 login pages",
   "trusted_login_patterns": [
